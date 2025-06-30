@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: auth-api
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/auth-db
+      - JWT_SECRET=your_jwt_secret_key_here
+    depends_on:
+      - mongo
+    volumes:
+      - .:/usr/src/app
+      # Use a named volume for node_modules to persist dependencies
+      - node_modules:/usr/src/app/node_modules
+    networks:
+      - app-network
+    command: sh -c "npm install && npm run dev"
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    command: [--noauth]
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+  # MongoDB Express removed for simplicity
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  # Add a named volume for node_modules
+  node_modules:
